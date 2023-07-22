@@ -30,3 +30,12 @@ Cypress.Commands.add("resetUsers", () => {
     url: "/auth/reset",
   });
 });
+
+Cypress.Commands.add("badRequest", (response, messages = []) => {
+  expect(response.status).to.eq(400);
+  expect(response.body.error).to.eq("Bad Request");
+
+  messages.forEach((message) => {
+    expect(message).to.be.oneOf(response.body.message);
+  });
+});

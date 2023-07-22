@@ -1,4 +1,10 @@
 describe("Auth module", () => {
+  const userData = {
+    name: "John Doe",
+    email: "john@nest.test",
+    password: "Secret_123",
+  };
+
   describe("Register", () => {
     /**
      * 1. error validation (null name, email and password)
@@ -14,13 +20,11 @@ describe("Auth module", () => {
         url: "/auth/register",
         failOnStatusCode: false,
       }).then((response) => {
-        expect(response.status).to.eq(400);
-        expect(response.body.error).to.eq("Bad Request");
-        expect("name should not be empty").to.be.oneOf(response.body.message);
-        expect("email should not be empty").to.be.oneOf(response.body.message);
-        expect("password should not be empty").to.be.oneOf(
-          response.body.message
-        );
+        cy.badRequest(response, [
+          "name should not be empty",
+          "email should not be empty",
+          "password should not be empty",
+        ]);
       });
     });
 
@@ -29,15 +33,13 @@ describe("Auth module", () => {
         method: "POST",
         url: "/auth/register",
         body: {
-          name: "John Doe",
+          name: userData.name,
           email: "john @nest.test",
-          password: "Secret_123",
+          password: userData.password,
         },
         failOnStatusCode: false,
       }).then((response) => {
-        expect(response.status).to.eq(400);
-        expect(response.body.error).to.eq("Bad Request");
-        expect("email must be an email").to.be.oneOf(response.body.message);
+        cy.badRequest(response, ["email must be an email"]);
       });
     });
 
@@ -46,17 +48,13 @@ describe("Auth module", () => {
         method: "POST",
         url: "/auth/register",
         body: {
-          name: "John Doe",
-          email: "john@nest.test",
+          name: userData.name,
+          email: userData.email,
           password: "invalidpassword",
         },
         failOnStatusCode: false,
       }).then((response) => {
-        expect(response.status).to.eq(400);
-        expect(response.body.error).to.eq("Bad Request");
-        expect("password is not strong enough").to.be.oneOf(
-          response.body.message
-        );
+        cy.badRequest(response, ["password is not strong enough"]);
       });
     });
 
@@ -66,11 +64,7 @@ describe("Auth module", () => {
       cy.request({
         method: "POST",
         url: "/auth/register",
-        body: {
-          name: "John Doe",
-          email: "john@nest.test",
-          password: "Secret_123",
-        },
+        body: userData,
       }).then((response) => {
         const { id, name, email, password } = response.body.data;
 
@@ -87,15 +81,9 @@ describe("Auth module", () => {
       cy.request({
         method: "POST",
         url: "/auth/register",
-        body: {
-          name: "John Doe",
-          email: "john@nest.test",
-          password: "Secret_123",
-        },
+        body: userData,
         failOnStatusCode: false,
       }).then((response) => {
-        cy.log(response);
-
         expect(response.status).to.eq(500);
         expect(response.body.success).to.be.false;
         expect(response.body.message).to.eq("Email already exists");
