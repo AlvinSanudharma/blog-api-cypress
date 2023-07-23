@@ -39,3 +39,8 @@ Cypress.Commands.add("badRequest", (response, messages = []) => {
     expect(message).to.be.oneOf(response.body.message);
   });
 });
+
+Cypress.Commands.add("unauthorize", (response) => {
+  expect(response.status).to.eq(401);
+  expect(response.body.message).to.eq("Unauthorized");
+});

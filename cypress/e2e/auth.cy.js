@@ -90,4 +90,49 @@ describe("Auth module", () => {
       });
     });
   });
+
+  describe("Login", () => {
+    /**
+     * 1. Unauthorize on failed
+     * 2. Return access token
+     */
+
+    it("should return unauthorize on failed", () => {
+      cy.request({
+        method: "POST",
+        url: "/auth/login",
+        body: {},
+        failOnStatusCode: false,
+      }).then((response) => {
+        cy.unauthorize(response);
+      });
+
+      cy.request({
+        method: "POST",
+        url: "/auth/login",
+        body: {
+          email: userData.email,
+          password: "wrong password",
+        },
+        failOnStatusCode: false,
+      }).then((response) => {
+        cy.unauthorize(response);
+      });
+    });
+
+    it.only("should return access token on success", () => {
+      cy.request({
+        method: "POST",
+        url: "/auth/login",
+        body: {
+          email: userData.email,
+          password: userData.password,
+        },
+      }).then((response) => {
+        expect(response.body.success).to.be.true;
+        expect(response.body.message).to.eq("Login success");
+        expect(response.body.data.access_token).not.to.be.undefined;
+      });
+    });
+  });
 });
